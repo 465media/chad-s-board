@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Activity, BarChart3, Bot } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, BarChart3, Bot, DollarSign, AlertTriangle } from 'lucide-react';
 import { TradingMetrics } from '@/types/kanban';
 
 interface TradingMetricsSidebarProps {
@@ -98,6 +98,15 @@ export function TradingMetricsSidebar({ metrics }: TradingMetricsSidebarProps) {
           <MetricRow label="Total" value={metrics.tradesTotal} />
           <MetricRow label="Yesterday" value={metrics.tradesYesterday} />
           <MetricRow label="7 Days" value={metrics.tradesWeek} />
+        </div>
+      </div>
+
+      {/* Additional Metrics Section */}
+      <div className="sidebar-section">
+        <SectionHeader icon={DollarSign} title="Trade Stats" />
+        <div className="space-y-1 divide-y divide-border/30">
+          <MetricRow label="Avg Trade Size" value={metrics.avgTradeSize} prefix="$" />
+          <MetricRow label="Max Drawdown" value={metrics.maxDrawdown} prefix="$" isProfit showTrend />
         </div>
       </div>
 
