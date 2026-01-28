@@ -1,4 +1,4 @@
-import { Bot, User, GripVertical, Trash2, Edit2, MessageSquare } from 'lucide-react';
+import { Bot, User, GripVertical, Trash2, Edit2 } from 'lucide-react';
 import { Task, TaskStatus } from '@/types/kanban';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,11 +33,21 @@ const priorityColors: Record<string, string> = {
 
 export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging }: TaskCardProps) {
   const statuses: TaskStatus[] = ['todo', 'in-progress', 'review', 'completed'];
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't open dialog if clicking on action buttons or dropdown
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('[role="menu"]')) {
+      return;
+    }
+    onComment(task);
+  };
   
   return (
     <div 
-      className={`task-card group animate-slide-in ${isDragging ? 'opacity-50 scale-105' : ''}`}
+      className={`task-card group animate-slide-in cursor-pointer ${isDragging ? 'opacity-50 scale-105' : ''}`}
       draggable
+      onClick={handleCardClick}
       onDragStart={(e) => {
         e.dataTransfer.setData('taskId', task.id);
         e.dataTransfer.effectAllowed = 'move';
@@ -50,14 +60,6 @@ export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging
             <div className="flex items-start justify-between gap-2 mb-2">
               <h4 className="font-medium text-foreground text-sm leading-tight">{task.title}</h4>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6"
-                  onClick={() => onComment(task)}
-                >
-                  <MessageSquare className="w-3 h-3" />
-                </Button>
                 <Button 
                   variant="ghost" 
                   size="icon" 
