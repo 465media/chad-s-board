@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Task, TaskStatus } from '@/types/kanban';
 import { KanbanColumn } from './KanbanColumn';
 import { AddTaskDialog } from './AddTaskDialog';
@@ -22,6 +22,18 @@ export function KanbanBoard({ tasks, onMove, onDelete, onAdd, onUpdate }: Kanban
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [defaultStatus, setDefaultStatus] = useState<TaskStatus>('todo');
+
+  // Listen for the header "Add Task" button event
+  useEffect(() => {
+    const handleOpenAddTask = () => {
+      setEditingTask(null);
+      setDefaultStatus('todo');
+      setDialogOpen(true);
+    };
+
+    document.addEventListener('openAddTask', handleOpenAddTask);
+    return () => document.removeEventListener('openAddTask', handleOpenAddTask);
+  }, []);
 
   const handleAddTask = (status: TaskStatus) => {
     setEditingTask(null);
