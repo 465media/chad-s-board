@@ -1,6 +1,7 @@
 import { Plus, Bot } from 'lucide-react';
 import { TradingMetricsSidebar } from '@/components/TradingMetricsSidebar';
 import { KanbanBoard } from '@/components/KanbanBoard';
+import { BotControlPanel } from '@/components/BotControlPanel';
 import { useRealtimeTasks } from '@/hooks/useRealtimeTasks';
 import { useTradingMetrics } from '@/hooks/useTradingMetrics';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,9 @@ const Index = () => {
           />
         </div>
       </main>
+
+      {/* Bot Control Panel - only visible when ?token=xxx is in URL */}
+      <BotControlPanel tasks={tasks} />
     </div>
   );
 };
