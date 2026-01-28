@@ -1,4 +1,4 @@
-import { Bot, User, GripVertical, Trash2, Edit2 } from 'lucide-react';
+import { Bot, User, GripVertical, Trash2, Edit2, MessageSquare } from 'lucide-react';
 import { Task, TaskStatus } from '@/types/kanban';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ interface TaskCardProps {
   onMove: (taskId: string, newStatus: TaskStatus) => void;
   onDelete: (taskId: string) => void;
   onEdit: (task: Task) => void;
+  onComment: (task: Task) => void;
   isDragging?: boolean;
 }
 
@@ -30,7 +31,7 @@ const priorityColors: Record<string, string> = {
   high: 'bg-loss/20 text-loss',
 };
 
-export function TaskCard({ task, onMove, onDelete, onEdit, isDragging }: TaskCardProps) {
+export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging }: TaskCardProps) {
   const statuses: TaskStatus[] = ['todo', 'in-progress', 'review', 'completed'];
   
   return (
@@ -46,27 +47,35 @@ export function TaskCard({ task, onMove, onDelete, onEdit, isDragging }: TaskCar
         <GripVertical className="w-4 h-4 text-muted-foreground mt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab" />
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <h4 className="font-medium text-foreground text-sm leading-tight">{task.title}</h4>
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6"
-                onClick={() => onEdit(task)}
-              >
-                <Edit2 className="w-3 h-3" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 hover:text-loss"
-                onClick={() => onDelete(task.id)}
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <h4 className="font-medium text-foreground text-sm leading-tight">{task.title}</h4>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6"
+                  onClick={() => onComment(task)}
+                >
+                  <MessageSquare className="w-3 h-3" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6"
+                  onClick={() => onEdit(task)}
+                >
+                  <Edit2 className="w-3 h-3" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 hover:text-loss"
+                  onClick={() => onDelete(task.id)}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
             </div>
-          </div>
           
           <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
           
