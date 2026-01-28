@@ -11,6 +11,7 @@ interface KanbanColumnProps {
   onMove: (taskId: string, newStatus: TaskStatus) => void;
   onDelete: (taskId: string) => void;
   onEdit: (task: Task) => void;
+  onComment: (task: Task) => void;
   onAddTask: (status: TaskStatus) => void;
 }
 
@@ -44,6 +45,7 @@ export function KanbanColumn({
   onMove, 
   onDelete, 
   onEdit,
+  onComment,
   onAddTask 
 }: KanbanColumnProps) {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -100,6 +102,7 @@ export function KanbanColumn({
             onMove={onMove}
             onDelete={onDelete}
             onEdit={onEdit}
+            onComment={onComment}
           />
         ))}
         
