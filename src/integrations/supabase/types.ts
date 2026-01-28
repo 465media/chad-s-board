@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      tasks: {
+        Row: {
+          assignee: string
+          created_at: string
+          description: string
+          id: string
+          priority: string
+          status: string
+          title: string
+        }
+        Insert: {
+          assignee?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          assignee?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       trading_metrics: {
         Row: {
           avg_trade_size: number

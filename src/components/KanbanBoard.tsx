@@ -7,7 +7,7 @@ interface KanbanBoardProps {
   tasks: Task[];
   onMove: (taskId: string, newStatus: TaskStatus) => void;
   onDelete: (taskId: string) => void;
-  onAdd: (title: string, description: string, assignee: Task['assignee'], priority: Task['priority']) => void;
+  onAdd: (title: string, description: string, assignee: Task['assignee'], priority: Task['priority'], status: TaskStatus) => void;
   onUpdate: (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => void;
 }
 

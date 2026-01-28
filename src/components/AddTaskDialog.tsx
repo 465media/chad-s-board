@@ -23,7 +23,7 @@ import {
 interface AddTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (title: string, description: string, assignee: Assignee, priority: Task['priority']) => void;
+  onSubmit: (title: string, description: string, assignee: Assignee, priority: Task['priority'], status: TaskStatus) => void;
   editTask?: Task | null;
   onUpdate?: (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => void;
   defaultStatus?: TaskStatus;
@@ -63,7 +63,7 @@ export function AddTaskDialog({
     if (editTask && onUpdate) {
       onUpdate(editTask.id, { title, description, assignee, priority });
     } else {
-      onSubmit(title, description, assignee, priority);
+      onSubmit(title, description, assignee, priority, defaultStatus || 'todo');
     }
     
     onOpenChange(false);
