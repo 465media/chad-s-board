@@ -52,6 +52,8 @@ const initialMetrics: TradingMetrics = {
   tradesTotal: 1847,
   tradesYesterday: 24,
   tradesWeek: 156,
+  avgTradeSize: 847.23,
+  maxDrawdown: -2145.67,
 };
 
 export function useKanban() {

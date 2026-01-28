@@ -22,6 +22,8 @@ export interface TradingMetrics {
   tradesTotal: number;
   tradesYesterday: number;
   tradesWeek: number;
+  avgTradeSize: number;
+  maxDrawdown: number;
 }
 
 export interface Column {
