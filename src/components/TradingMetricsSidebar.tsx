@@ -1,8 +1,11 @@
 import { TrendingUp, TrendingDown, Activity, BarChart3, Bot, DollarSign, AlertTriangle } from 'lucide-react';
 import { TradingMetrics } from '@/types/kanban';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TradingMetricsSidebarProps {
   metrics: TradingMetrics;
+  lastUpdated?: Date | null;
+  loading?: boolean;
 }
 
 function MetricRow({ 
@@ -51,7 +54,31 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ComponentType<{ clas
   );
 }
 
-export function TradingMetricsSidebar({ metrics }: TradingMetricsSidebarProps) {
+export function TradingMetricsSidebar({ metrics, lastUpdated, loading }: TradingMetricsSidebarProps) {
+  if (loading) {
+    return (
+      <aside className="w-72 bg-sidebar border-r border-sidebar-border p-4 flex flex-col gap-4">
+        <div className="flex items-center gap-3 pb-4 border-b border-sidebar-border">
+          <Skeleton className="w-10 h-10 rounded-xl" />
+          <div className="flex-1">
+            <Skeleton className="h-4 w-24 mb-1" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        </div>
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="sidebar-section">
+            <Skeleton className="h-4 w-16 mb-3" />
+            <div className="space-y-3">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+            </div>
+          </div>
+        ))}
+      </aside>
+    );
+  }
+
   return (
     <aside className="w-72 bg-sidebar border-r border-sidebar-border p-4 flex flex-col gap-4 overflow-y-auto">
       {/* Header */}
@@ -113,7 +140,7 @@ export function TradingMetricsSidebar({ metrics }: TradingMetricsSidebarProps) {
       {/* Footer */}
       <div className="mt-auto pt-4 border-t border-sidebar-border">
         <p className="text-xs text-muted-foreground text-center">
-          Last updated: {new Date().toLocaleTimeString()}
+          Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : 'Loading...'}
         </p>
       </div>
     </aside>

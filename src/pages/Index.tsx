@@ -2,14 +2,16 @@ import { Plus, Bot } from 'lucide-react';
 import { TradingMetricsSidebar } from '@/components/TradingMetricsSidebar';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { useKanban } from '@/hooks/useKanban';
+import { useTradingMetrics } from '@/hooks/useTradingMetrics';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
-  const { tasks, metrics, addTask, updateTask, deleteTask, moveTask } = useKanban();
+  const { tasks, addTask, updateTask, deleteTask, moveTask } = useKanban();
+  const { metrics, loading, lastUpdated } = useTradingMetrics('Crypto_Chad');
 
   return (
     <div className="flex min-h-screen w-full bg-background">
-      <TradingMetricsSidebar metrics={metrics} />
+      <TradingMetricsSidebar metrics={metrics} lastUpdated={lastUpdated} loading={loading} />
       
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
