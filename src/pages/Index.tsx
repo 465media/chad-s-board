@@ -5,16 +5,25 @@ import { BotControlPanel } from '@/components/BotControlPanel';
 import { useRealtimeTasks } from '@/hooks/useRealtimeTasks';
 import { useTradingMetrics } from '@/hooks/useTradingMetrics';
 import { Button } from '@/components/ui/button';
+import { useBotToken } from '@/contexts/BotTokenContext';
 
 const Index = () => {
   const { tasks, addTask, updateTask, deleteTask, moveTask } = useRealtimeTasks();
   const { metrics, loading: metricsLoading, lastUpdated } = useTradingMetrics('Crypto_Chad');
+  const { isBot } = useBotToken();
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
+    <div className={`flex min-h-screen w-full bg-background ${isBot ? 'ring-4 ring-inset ring-accent' : ''}`}>
+      {/* Bot Mode Indicator Banner */}
+      {isBot && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-accent text-accent-foreground text-center py-1.5 text-sm font-bold tracking-wide">
+          🤖 BOT VIEW MODE — Crypto_Chad's Browser
+        </div>
+      )}
+      
       <TradingMetricsSidebar metrics={metrics} lastUpdated={lastUpdated} loading={metricsLoading} />
       
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className={`flex-1 flex flex-col overflow-hidden ${isBot ? 'mt-8' : ''}`}>
         {/* Header */}
         <header className="border-b border-border px-6 py-4 flex items-center justify-between bg-card/30 backdrop-blur-sm">
           <div className="flex items-center gap-3">

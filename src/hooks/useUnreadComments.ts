@@ -18,6 +18,8 @@ export function useUnreadComments(taskIds: string[]) {
     if (taskIds.length === 0) return;
 
     const checkUnread = async () => {
+      console.log('[UnreadComments] Checking unread status', { isBot, otherAuthor, viewedColumn, taskIds });
+      
       // Get tasks with their last viewed timestamps
       const { data: tasks, error: tasksError } = await supabase
         .from('tasks')
@@ -28,6 +30,8 @@ export function useUnreadComments(taskIds: string[]) {
         console.error('Error fetching tasks:', tasksError);
         return;
       }
+
+      console.log('[UnreadComments] Tasks data:', tasks);
 
       // Get the latest comment from the "other party" for each task
       const { data: comments, error: commentsError } = await supabase
@@ -41,6 +45,8 @@ export function useUnreadComments(taskIds: string[]) {
         console.error('Error fetching comments:', commentsError);
         return;
       }
+
+      console.log('[UnreadComments] Comments from', otherAuthor, ':', comments);
 
       // Build unread status map
       const newStatus: UnreadStatus = {};
@@ -65,6 +71,7 @@ export function useUnreadComments(taskIds: string[]) {
         }
       }
 
+      console.log('[UnreadComments] Final unread status:', newStatus);
       setUnreadStatus(newStatus);
     };
 
