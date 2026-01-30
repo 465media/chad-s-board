@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react';
 import { Bot, User, GripVertical, Trash2, Edit2, MessageCircle } from 'lucide-react';
 import { Task, TaskStatus } from '@/types/kanban';
 import { Badge } from '@/components/ui/badge';
@@ -36,11 +37,18 @@ const priorityColors: Record<string, string> = {
 export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging, hasUnread }: TaskCardProps) {
   const { isBot } = useBotToken();
   const statuses: TaskStatus[] = ['todo', 'in-progress', 'review', 'completed'];
+  const [localDragging, setLocalDragging] = useState(false);
+  const dragRef = useRef(false);
 
   // Determine who the "other party" is for the unread indicator
   const otherPartyLabel = isBot ? 'User' : 'Chad';
 
   const handleCardClick = (e: React.MouseEvent) => {
+    // Don't open dialog if we just finished dragging
+    if (dragRef.current) {
+      dragRef.current = false;
+      return;
+    }
     // Don't open dialog if clicking on action buttons or dropdown
     const target = e.target as HTMLElement;
     if (target.closest('button') || target.closest('[role="menu"]')) {
@@ -48,16 +56,43 @@ export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging
     }
     onComment(task);
   };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    setLocalDragging(true);
+    dragRef.current = true;
+    e.dataTransfer.setData('text/plain', task.id);
+    e.dataTransfer.setData('taskId', task.id);
+    e.dataTransfer.effectAllowed = 'move';
+    
+    // Create a custom drag image
+    const dragImage = e.currentTarget.cloneNode(true) as HTMLElement;
+    dragImage.style.opacity = '0.8';
+    dragImage.style.position = 'absolute';
+    dragImage.style.top = '-1000px';
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 0, 0);
+    
+    // Clean up the drag image after a short delay
+    setTimeout(() => {
+      document.body.removeChild(dragImage);
+    }, 0);
+  };
+
+  const handleDragEnd = () => {
+    setLocalDragging(false);
+    // Reset drag flag after a short delay to prevent click from firing
+    setTimeout(() => {
+      dragRef.current = false;
+    }, 100);
+  };
   
   return (
     <div 
-      className={`task-card group animate-slide-in cursor-pointer relative ${isDragging ? 'opacity-50 scale-105' : ''} ${hasUnread ? 'ring-2 ring-accent/50' : ''}`}
-      draggable
+      className={`task-card group animate-slide-in cursor-grab active:cursor-grabbing relative select-none ${localDragging || isDragging ? 'opacity-50 scale-105 ring-2 ring-primary' : ''} ${hasUnread ? 'ring-2 ring-accent/50' : ''}`}
+      draggable="true"
       onClick={handleCardClick}
-      onDragStart={(e) => {
-        e.dataTransfer.setData('taskId', task.id);
-        e.dataTransfer.effectAllowed = 'move';
-      }}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
       {/* Unread indicator */}
       {hasUnread && (

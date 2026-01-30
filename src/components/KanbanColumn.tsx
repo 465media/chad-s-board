@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Plus } from 'lucide-react';
 import { Task, TaskStatus } from '@/types/kanban';
 import { TaskCard } from './TaskCard';
@@ -51,22 +51,37 @@ export function KanbanColumn({
   unreadStatus 
 }: KanbanColumnProps) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const dragCounter = useRef(0);
   const styles = columnStyles[id];
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current++;
+    if (e.dataTransfer.types.includes('taskid') || e.dataTransfer.types.includes('text/plain')) {
+      setIsDragOver(true);
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    setIsDragOver(true);
   };
 
-  const handleDragLeave = () => {
-    setIsDragOver(false);
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragOver(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    dragCounter.current = 0;
     setIsDragOver(false);
-    const taskId = e.dataTransfer.getData('taskId');
+    
+    // Try both data formats
+    const taskId = e.dataTransfer.getData('taskId') || e.dataTransfer.getData('text/plain');
     if (taskId) {
       onMove(taskId, id);
     }
@@ -74,7 +89,8 @@ export function KanbanColumn({
 
   return (
     <div 
-      className={`kanban-column border-t-2 ${styles.border} ${isDragOver ? 'ring-2 ring-primary/50' : ''} transition-all`}
+      className={`kanban-column border-t-2 ${styles.border} ${isDragOver ? 'ring-2 ring-primary/50 bg-primary/5' : ''} transition-all`}
+      onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

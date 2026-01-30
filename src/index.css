@@ -137,11 +137,18 @@
 
   .task-card {
     @apply bg-secondary/80 backdrop-blur-sm rounded-lg border border-border/50 p-4 cursor-grab active:cursor-grabbing transition-all duration-200;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
   }
 
   .task-card:hover {
     @apply border-primary/50;
     box-shadow: var(--glow-primary);
+  }
+
+  .task-card[draggable="true"]:active {
+    @apply opacity-70;
   }
 
   .metric-card {
