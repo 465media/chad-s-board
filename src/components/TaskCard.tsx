@@ -1,32 +1,19 @@
-import { useState, useRef } from 'react';
 import { Bot, User, GripVertical, Trash2, Edit2, MessageCircle } from 'lucide-react';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { Task, TaskStatus } from '@/types/kanban';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { useBotToken } from '@/contexts/BotTokenContext';
 
 interface TaskCardProps {
   task: Task;
-  onMove: (taskId: string, newStatus: TaskStatus) => void;
   onDelete: (taskId: string) => void;
   onEdit: (task: Task) => void;
   onComment: (task: Task) => void;
-  isDragging?: boolean;
   hasUnread?: boolean;
+  isDragOverlay?: boolean;
 }
-
-const statusLabels: Record<TaskStatus, string> = {
-  'todo': 'To Do',
-  'in-progress': 'In Progress',
-  'review': 'For Review',
-  'completed': 'Completed',
-};
 
 const priorityColors: Record<string, string> = {
   low: 'bg-muted text-muted-foreground',
@@ -34,99 +21,94 @@ const priorityColors: Record<string, string> = {
   high: 'bg-loss/20 text-loss',
 };
 
-export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging, hasUnread }: TaskCardProps) {
+export function TaskCard({ task, onDelete, onEdit, onComment, hasUnread, isDragOverlay }: TaskCardProps) {
   const { isBot } = useBotToken();
-  const statuses: TaskStatus[] = ['todo', 'in-progress', 'review', 'completed'];
-  const [localDragging, setLocalDragging] = useState(false);
-  const dragRef = useRef(false);
+  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: task.id,
+    disabled: isDragOverlay,
+  });
 
   // Determine who the "other party" is for the unread indicator
   const otherPartyLabel = isBot ? 'User' : 'Chad';
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Don't open dialog if we just finished dragging
-    if (dragRef.current) {
-      dragRef.current = false;
+    // Don't open dialog if clicking on action buttons
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) {
       return;
     }
-    // Don't open dialog if clicking on action buttons or dropdown
-    const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('[role="menu"]')) {
+    // Don't open if we're dragging
+    if (isDragging) {
       return;
     }
     onComment(task);
   };
 
-  const handleDragStart = (e: React.DragEvent) => {
-    setLocalDragging(true);
-    dragRef.current = true;
-    e.dataTransfer.setData('text/plain', task.id);
-    e.dataTransfer.setData('taskId', task.id);
-    e.dataTransfer.effectAllowed = 'move';
-    
-    // Create a custom drag image
-    const dragImage = e.currentTarget.cloneNode(true) as HTMLElement;
-    dragImage.style.opacity = '0.8';
-    dragImage.style.position = 'absolute';
-    dragImage.style.top = '-1000px';
-    document.body.appendChild(dragImage);
-    e.dataTransfer.setDragImage(dragImage, 0, 0);
-    
-    // Clean up the drag image after a short delay
-    setTimeout(() => {
-      document.body.removeChild(dragImage);
-    }, 0);
-  };
-
-  const handleDragEnd = () => {
-    setLocalDragging(false);
-    // Reset drag flag after a short delay to prevent click from firing
-    setTimeout(() => {
-      dragRef.current = false;
-    }, 100);
-  };
+  const style = transform ? {
+    transform: CSS.Translate.toString(transform),
+    zIndex: isDragging ? 50 : undefined,
+  } : undefined;
   
   return (
     <div 
-      className={`task-card group animate-slide-in cursor-grab active:cursor-grabbing relative select-none ${localDragging || isDragging ? 'opacity-50 scale-105 ring-2 ring-primary' : ''} ${hasUnread ? 'ring-2 ring-accent/50' : ''}`}
-      draggable="true"
+      ref={setNodeRef}
+      style={style}
+      className={`task-card group animate-slide-in relative touch-none ${isDragging ? 'opacity-50 scale-105 ring-2 ring-primary' : ''} ${hasUnread ? 'ring-2 ring-accent/50' : ''}`}
       onClick={handleCardClick}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
     >
       {/* Unread indicator */}
-      {hasUnread && (
-        <div className="absolute -top-1 -right-1 flex items-center gap-1 bg-accent text-accent-foreground text-[10px] font-medium px-1.5 py-0.5 rounded-full shadow-sm">
+      {hasUnread && !isDragging && (
+        <div className="absolute -top-1 -right-1 flex items-center gap-1 bg-accent text-accent-foreground text-[10px] font-medium px-1.5 py-0.5 rounded-full shadow-sm z-10">
           <MessageCircle className="w-3 h-3" />
           <span>New from {otherPartyLabel}</span>
         </div>
       )}
       
       <div className="flex items-start gap-3">
-        <GripVertical className="w-4 h-4 text-muted-foreground mt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab" />
+        {/* Drag handle */}
+        <div 
+          {...listeners} 
+          {...attributes}
+          className="w-6 h-6 flex items-center justify-center text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-none"
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
         
         <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h4 className="font-medium text-foreground text-sm leading-tight">{task.title}</h4>
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6"
-                  onClick={() => onEdit(task)}
-                >
-                  <Edit2 className="w-3 h-3" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6 hover:text-loss"
-                  onClick={() => onDelete(task.id)}
-                >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              </div>
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h4 className="font-medium text-foreground text-sm leading-tight">{task.title}</h4>
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(task);
+                }}
+              >
+                <Edit2 className="w-3 h-3" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 hover:text-loss"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(task.id);
+                }}
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
             </div>
+          </div>
           
           <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
           
@@ -137,27 +119,6 @@ export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging
                   {task.priority}
                 </Badge>
               )}
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Badge variant="outline" className="cursor-pointer hover:bg-secondary text-xs">
-                    Move →
-                  </Badge>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  {statuses.filter(s => s !== task.status).map(status => (
-                    <DropdownMenuItem 
-                      key={status}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMove(task.id, status);
-                      }}
-                    >
-                      {statusLabels[status]}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
             
             <div className="flex items-center gap-1.5">

@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
 import { Plus } from 'lucide-react';
+import { useDroppable } from '@dnd-kit/core';
 import { Task, TaskStatus } from '@/types/kanban';
 import { TaskCard } from './TaskCard';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,6 @@ interface KanbanColumnProps {
   id: TaskStatus;
   title: string;
   tasks: Task[];
-  onMove: (taskId: string, newStatus: TaskStatus) => void;
   onDelete: (taskId: string) => void;
   onEdit: (task: Task) => void;
   onComment: (task: Task) => void;
@@ -43,57 +42,22 @@ export function KanbanColumn({
   id, 
   title, 
   tasks, 
-  onMove, 
   onDelete, 
   onEdit,
   onComment,
   onAddTask,
   unreadStatus 
 }: KanbanColumnProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const dragCounter = useRef(0);
+  const { isOver, setNodeRef } = useDroppable({
+    id: id,
+  });
+
   const styles = columnStyles[id];
-
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    dragCounter.current++;
-    if (e.dataTransfer.types.includes('taskid') || e.dataTransfer.types.includes('text/plain')) {
-      setIsDragOver(true);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    dragCounter.current--;
-    if (dragCounter.current === 0) {
-      setIsDragOver(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    dragCounter.current = 0;
-    setIsDragOver(false);
-    
-    // Try both data formats
-    const taskId = e.dataTransfer.getData('taskId') || e.dataTransfer.getData('text/plain');
-    if (taskId) {
-      onMove(taskId, id);
-    }
-  };
 
   return (
     <div 
-      className={`kanban-column border-t-2 ${styles.border} ${isDragOver ? 'ring-2 ring-primary/50 bg-primary/5' : ''} transition-all`}
-      onDragEnter={handleDragEnter}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      ref={setNodeRef}
+      className={`kanban-column border-t-2 ${styles.border} ${isOver ? 'ring-2 ring-primary/50 bg-primary/5' : ''} transition-all`}
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -112,12 +76,11 @@ export function KanbanColumn({
         </Button>
       </div>
       
-      <div className="space-y-3">
+      <div className="space-y-3 min-h-[100px]">
         {tasks.map(task => (
           <TaskCard 
             key={task.id} 
             task={task} 
-            onMove={onMove}
             onDelete={onDelete}
             onEdit={onEdit}
             onComment={onComment}
@@ -126,7 +89,7 @@ export function KanbanColumn({
         ))}
         
         {tasks.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground text-sm border border-dashed border-border rounded-lg">
+          <div className={`text-center py-8 text-muted-foreground text-sm border border-dashed rounded-lg transition-colors ${isOver ? 'border-primary bg-primary/10' : 'border-border'}`}>
             Drop tasks here
           </div>
         )}
