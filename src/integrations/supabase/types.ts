@@ -52,6 +52,8 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          last_viewed_bot: string | null
+          last_viewed_user: string | null
           priority: string
           status: string
           title: string
@@ -61,6 +63,8 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          last_viewed_bot?: string | null
+          last_viewed_user?: string | null
           priority?: string
           status?: string
           title: string
@@ -70,6 +74,8 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          last_viewed_bot?: string | null
+          last_viewed_user?: string | null
           priority?: string
           status?: string
           title?: string

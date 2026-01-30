@@ -1,4 +1,4 @@
-import { Bot, User, GripVertical, Trash2, Edit2 } from 'lucide-react';
+import { Bot, User, GripVertical, Trash2, Edit2, MessageCircle } from 'lucide-react';
 import { Task, TaskStatus } from '@/types/kanban';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useBotToken } from '@/contexts/BotTokenContext';
 
 interface TaskCardProps {
   task: Task;
@@ -16,6 +17,7 @@ interface TaskCardProps {
   onEdit: (task: Task) => void;
   onComment: (task: Task) => void;
   isDragging?: boolean;
+  hasUnread?: boolean;
 }
 
 const statusLabels: Record<TaskStatus, string> = {
@@ -31,8 +33,12 @@ const priorityColors: Record<string, string> = {
   high: 'bg-loss/20 text-loss',
 };
 
-export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging }: TaskCardProps) {
+export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging, hasUnread }: TaskCardProps) {
+  const { isBot } = useBotToken();
   const statuses: TaskStatus[] = ['todo', 'in-progress', 'review', 'completed'];
+
+  // Determine who the "other party" is for the unread indicator
+  const otherPartyLabel = isBot ? 'User' : 'Chad';
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't open dialog if clicking on action buttons or dropdown
@@ -45,7 +51,7 @@ export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging
   
   return (
     <div 
-      className={`task-card group animate-slide-in cursor-pointer ${isDragging ? 'opacity-50 scale-105' : ''}`}
+      className={`task-card group animate-slide-in cursor-pointer relative ${isDragging ? 'opacity-50 scale-105' : ''} ${hasUnread ? 'ring-2 ring-accent/50' : ''}`}
       draggable
       onClick={handleCardClick}
       onDragStart={(e) => {
@@ -53,6 +59,14 @@ export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging
         e.dataTransfer.effectAllowed = 'move';
       }}
     >
+      {/* Unread indicator */}
+      {hasUnread && (
+        <div className="absolute -top-1 -right-1 flex items-center gap-1 bg-accent text-accent-foreground text-[10px] font-medium px-1.5 py-0.5 rounded-full shadow-sm">
+          <MessageCircle className="w-3 h-3" />
+          <span>New from {otherPartyLabel}</span>
+        </div>
+      )}
+      
       <div className="flex items-start gap-3">
         <GripVertical className="w-4 h-4 text-muted-foreground mt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab" />
         

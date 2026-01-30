@@ -208,6 +208,39 @@ serve(async (req) => {
         );
       }
 
+      case 'mark_as_read': {
+        const { task_id } = payload;
+        
+        if (!task_id) {
+          return new Response(
+            JSON.stringify({ error: 'Missing task_id' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // Bot marks as read by updating last_viewed_bot
+        const { data, error } = await supabase
+          .from('tasks')
+          .update({ last_viewed_bot: new Date().toISOString() })
+          .eq('id', task_id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error marking task as read:', error);
+          return new Response(
+            JSON.stringify({ error: 'Failed to mark task as read', details: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        console.log('Bot marked task as read:', data);
+        return new Response(
+          JSON.stringify({ success: true, data }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       default:
         return new Response(
           JSON.stringify({ error: `Unknown action: ${action}` }),

@@ -10,6 +10,8 @@ export interface Task {
   assignee: Assignee;
   createdAt: Date;
   priority?: 'low' | 'medium' | 'high';
+  lastViewedUser?: Date | null;
+  lastViewedBot?: Date | null;
 }
 
 export interface TradingMetrics {

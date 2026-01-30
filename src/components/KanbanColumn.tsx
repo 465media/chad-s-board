@@ -13,6 +13,7 @@ interface KanbanColumnProps {
   onEdit: (task: Task) => void;
   onComment: (task: Task) => void;
   onAddTask: (status: TaskStatus) => void;
+  unreadStatus: { [taskId: string]: boolean };
 }
 
 const columnStyles: Record<TaskStatus, { border: string; badge: string; badgeBg: string }> = {
@@ -46,7 +47,8 @@ export function KanbanColumn({
   onDelete, 
   onEdit,
   onComment,
-  onAddTask 
+  onAddTask,
+  unreadStatus 
 }: KanbanColumnProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const styles = columnStyles[id];
@@ -103,6 +105,7 @@ export function KanbanColumn({
             onDelete={onDelete}
             onEdit={onEdit}
             onComment={onComment}
+            hasUnread={unreadStatus[task.id] || false}
           />
         ))}
         

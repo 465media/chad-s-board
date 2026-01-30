@@ -21,12 +21,16 @@ interface CompleteTaskPayload {
   comment?: string;
 }
 
+interface MarkAsReadPayload {
+  task_id: string;
+}
+
 export const useBotActions = () => {
   const { token } = useBotToken();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  const callBotAction = async (action: string, payload: CreateTaskPayload | AddCommentPayload | CompleteTaskPayload) => {
+  const callBotAction = async (action: string, payload: CreateTaskPayload | AddCommentPayload | CompleteTaskPayload | MarkAsReadPayload) => {
     if (!token) {
       toast({
         title: 'Error',
@@ -84,10 +88,15 @@ export const useBotActions = () => {
     return callBotAction('complete_task', payload);
   };
 
+  const markAsRead = async (payload: MarkAsReadPayload) => {
+    return callBotAction('mark_as_read', payload);
+  };
+
   return {
     loading,
     createTask,
     addComment,
     completeTask,
+    markAsRead,
   };
 };
