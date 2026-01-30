@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Task, TaskStatus } from '@/types/kanban';
 import { KanbanColumn } from './KanbanColumn';
 import { AddTaskDialog } from './AddTaskDialog';
 import { TaskCommentsDialog } from './TaskCommentsDialog';
+import { useUnreadComments } from '@/hooks/useUnreadComments';
 
 interface KanbanBoardProps {
   tasks: Task[];
@@ -25,6 +26,10 @@ export function KanbanBoard({ tasks, onMove, onDelete, onAdd, onUpdate }: Kanban
   const [defaultStatus, setDefaultStatus] = useState<TaskStatus>('todo');
   const [commentsTask, setCommentsTask] = useState<Task | null>(null);
   const [commentsOpen, setCommentsOpen] = useState(false);
+
+  // Track unread comments
+  const taskIds = useMemo(() => tasks.map(t => t.id), [tasks]);
+  const { unreadStatus, markAsRead } = useUnreadComments(taskIds);
 
   // Listen for the header "Add Task" button event
   useEffect(() => {
@@ -71,6 +76,7 @@ export function KanbanBoard({ tasks, onMove, onDelete, onAdd, onUpdate }: Kanban
             onEdit={handleEditTask}
             onComment={handleCommentTask}
             onAddTask={handleAddTask}
+            unreadStatus={unreadStatus}
           />
         ))}
       </div>
@@ -88,6 +94,7 @@ export function KanbanBoard({ tasks, onMove, onDelete, onAdd, onUpdate }: Kanban
         task={commentsTask}
         open={commentsOpen}
         onOpenChange={setCommentsOpen}
+        onMarkAsRead={markAsRead}
       />
     </>
   );

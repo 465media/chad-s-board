@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bot, User, Send, Trash2, FileText } from 'lucide-react';
 import { Task, Assignee } from '@/types/kanban';
 import { useTaskComments } from '@/hooks/useTaskComments';
@@ -25,6 +25,7 @@ interface TaskCommentsDialogProps {
   task: Task | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onMarkAsRead?: (taskId: string) => void;
 }
 
 const priorityColors: Record<string, string> = {
@@ -40,11 +41,18 @@ const statusLabels: Record<string, string> = {
   'completed': 'Completed',
 };
 
-export function TaskCommentsDialog({ task, open, onOpenChange }: TaskCommentsDialogProps) {
+export function TaskCommentsDialog({ task, open, onOpenChange, onMarkAsRead }: TaskCommentsDialogProps) {
   const { comments, loading, addComment, deleteComment } = useTaskComments(task?.id ?? null);
   const [newComment, setNewComment] = useState('');
   const [author, setAuthor] = useState<Assignee>('user');
   const [submitting, setSubmitting] = useState(false);
+
+  // Mark as read when dialog opens
+  useEffect(() => {
+    if (open && task && onMarkAsRead) {
+      onMarkAsRead(task.id);
+    }
+  }, [open, task?.id, onMarkAsRead]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

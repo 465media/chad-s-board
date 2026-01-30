@@ -1,0 +1,2 @@
+-- Allow anyone to update the last_viewed columns on tasks
+-- (This is already covered by the existing "Anyone can update tasks" policy)
