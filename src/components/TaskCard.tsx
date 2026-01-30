@@ -90,7 +90,7 @@ export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging
               )}
               
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                   <Badge variant="outline" className="cursor-pointer hover:bg-secondary text-xs">
                     Move →
                   </Badge>
@@ -99,7 +99,10 @@ export function TaskCard({ task, onMove, onDelete, onEdit, onComment, isDragging
                   {statuses.filter(s => s !== task.status).map(status => (
                     <DropdownMenuItem 
                       key={status}
-                      onClick={() => onMove(task.id, status)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMove(task.id, status);
+                      }}
                     >
                       {statusLabels[status]}
                     </DropdownMenuItem>
